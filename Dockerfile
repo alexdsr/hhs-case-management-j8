@@ -15,29 +15,21 @@ RUN mvn clean package -DskipTests -q
 # ─────────────────────────────────────────────────────────────────────────────
 FROM jboss/wildfly:18.0.1.Final
 
-# Copy built WAR
 COPY --from=build /build/target/hhs-case-management-j8.war \
      /opt/jboss/wildfly/standalone/deployments/
 
-# Copy datasource CLI script to /opt/jboss (jboss user home) so sed -i
-# can write its temp file — /tmp denies rename for the jboss user
 COPY --from=build /build/src/main/scripts/datasource.cli /opt/jboss/datasource.cli
 
+# Run setup as root — sed -i needs write access to /opt/jboss/
 USER root
-RUN mkdir -p /opt/jboss/hhsdb_j8 && chown jboss:jboss /opt/jboss/hhsdb_j8
+RUN mkdir -p /opt/jboss/hhsdb_j8 && \
+    sed -i 's|~/hhsdb_j8/hhsdb_j8|/opt/jboss/hhsdb_j8/hhsdb_j8|g' /opt/jboss/datasource.cli && \
+    chown -R jboss:jboss /opt/jboss/hhsdb_j8 /opt/jboss/datasource.cli
+
 USER jboss
 
-# Rewrite the H2 path to the container path
-RUN sed -i 's|~/hhsdb_j8/hhsdb_j8|/opt/jboss/hhsdb_j8/hhsdb_j8|g' /opt/jboss/datasource.cli
-
 CMD ["/bin/bash", "-c", \
-     "/opt/jboss/wildfly/bin/standalone.sh \
-        -b 0.0.0.0 \
-        -bmanagement 0.0.0.0 \
-        -c standalone-full.xml \
-        --read-only-server-config=false & \
+     "/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0 -c standalone-full.xml & \
       sleep 25 && \
-      /opt/jboss/wildfly/bin/jboss-cli.sh \
-        --connect \
-        --file=/opt/jboss/datasource.cli && \
+      /opt/jboss/wildfly/bin/jboss-cli.sh --connect --file=/opt/jboss/datasource.cli && \
       wait"]
