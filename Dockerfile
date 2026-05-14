@@ -19,15 +19,16 @@ FROM jboss/wildfly:18.0.1.Final
 COPY --from=build /build/target/hhs-case-management-j8.war \
      /opt/jboss/wildfly/standalone/deployments/
 
-# Copy datasource CLI script
-COPY --from=build /build/src/main/scripts/datasource.cli /tmp/datasource.cli
+# Copy datasource CLI script to /opt/jboss (jboss user home) so sed -i
+# can write its temp file — /tmp denies rename for the jboss user
+COPY --from=build /build/src/main/scripts/datasource.cli /opt/jboss/datasource.cli
 
 USER root
 RUN mkdir -p /opt/jboss/hhsdb_j8 && chown jboss:jboss /opt/jboss/hhsdb_j8
 USER jboss
 
-# Point H2 at the container path
-RUN sed -i 's|~/hhsdb_j8/hhsdb_j8|/opt/jboss/hhsdb_j8/hhsdb_j8|g' /tmp/datasource.cli
+# Rewrite the H2 path to the container path
+RUN sed -i 's|~/hhsdb_j8/hhsdb_j8|/opt/jboss/hhsdb_j8/hhsdb_j8|g' /opt/jboss/datasource.cli
 
 CMD ["/bin/bash", "-c", \
      "/opt/jboss/wildfly/bin/standalone.sh \
@@ -35,8 +36,8 @@ CMD ["/bin/bash", "-c", \
         -bmanagement 0.0.0.0 \
         -c standalone-full.xml \
         --read-only-server-config=false & \
-      sleep 20 && \
+      sleep 25 && \
       /opt/jboss/wildfly/bin/jboss-cli.sh \
         --connect \
-        --file=/tmp/datasource.cli && \
+        --file=/opt/jboss/datasource.cli && \
       wait"]
