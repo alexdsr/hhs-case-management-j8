@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      lang="en">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="pageTitle">Apply for Services</ui:define>
+
+    <ui:define name="content">
+
+        <h1 class="page-title">Apply for Health &amp; Human Services</h1>
+
+        <div class="intake-intro" role="note">
+            <strong>Before you begin:</strong> Completing this form submits your request for services.
+            A caseworker will contact you within 3–5 business days to discuss your eligibility.
+            If you need immediate assistance, call <strong>1-800-555-0100</strong>.
+        </div>
+
+        <h:messages globalOnly="true" styleClass="alert alert-error"
+                    role="alert" aria-live="assertive" />
+
+        <h:form id="intakeForm" aria-label="Service application form"
+                rendered="#{!intakeBean.reviewMode}">
+
+            <!-- Section 1: Personal Information -->
+            <div class="card">
+                <h2 class="card-title">Personal Information</h2>
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="firstName">
+                            First Name <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:inputText id="firstName"
+                                     value="#{intakeBean.client.firstName}"
+                                     required="true"
+                                     requiredMessage="First name is required."
+                                     maxlength="60"
+                                     autocomplete="given-name"
+                                     aria-required="true"
+                                     aria-describedby="firstName-error" />
+                        <h:message for="firstName" styleClass="field-error" id="firstName-error" role="alert" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">
+                            Last Name <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:inputText id="lastName"
+                                     value="#{intakeBean.client.lastName}"
+                                     required="true"
+                                     requiredMessage="Last name is required."
+                                     maxlength="60"
+                                     autocomplete="family-name"
+                                     aria-required="true"
+                                     aria-describedby="lastName-error" />
+                        <h:message for="lastName" styleClass="field-error" id="lastName-error" role="alert" />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label id="dob-label">
+                            Date of Birth <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <div class="dob-fields" role="group" aria-labelledby="dob-label" aria-describedby="dob-hint dob-error">
+                            <div class="dob-field">
+                                <label for="dobMonth" class="dob-sublabel">Month</label>
+                                <h:inputText id="dobMonth"
+                                             value="#{intakeBean.dobMonth}"
+                                             maxlength="2"
+                                             inputmode="numeric"
+                                             autocomplete="bday-month"
+                                             aria-required="true"
+                                             placeholder="MM"
+                                             style="width:4rem; text-align:center;" />
+                            </div>
+                            <span class="dob-sep" aria-hidden="true">/</span>
+                            <div class="dob-field">
+                                <label for="dobDay" class="dob-sublabel">Day</label>
+                                <h:inputText id="dobDay"
+                                             value="#{intakeBean.dobDay}"
+                                             maxlength="2"
+                                             inputmode="numeric"
+                                             autocomplete="bday-day"
+                                             aria-required="true"
+                                             placeholder="DD"
+                                             style="width:4rem; text-align:center;" />
+                            </div>
+                            <span class="dob-sep" aria-hidden="true">/</span>
+                            <div class="dob-field">
+                                <label for="dobYear" class="dob-sublabel">Year</label>
+                                <h:inputText id="dobYear"
+                                             value="#{intakeBean.dobYear}"
+                                             maxlength="4"
+                                             inputmode="numeric"
+                                             autocomplete="bday-year"
+                                             aria-required="true"
+                                             placeholder="YYYY"
+                                             style="width:5.5rem; text-align:center;" />
+                            </div>
+                        </div>
+                        <span id="dob-hint" class="text-muted" style="font-size:.8rem;">For example: 03 / 14 / 1978</span>
+                        <h:messages globalOnly="false" styleClass="field-error" id="dob-error"
+                                    showDetail="true" showSummary="false" role="alert" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ssnLastFour">Last 4 digits of SSN</label>
+                        <h:inputText id="ssnLastFour"
+                                     value="#{intakeBean.client.ssnLastFour}"
+                                     maxlength="4"
+                                     autocomplete="off"
+                                     aria-describedby="ssn-hint ssn-error"
+                                     inputmode="numeric"
+                                     pattern="[0-9]{4}" />
+                        <span id="ssn-hint" class="text-muted" style="font-size:.8rem;">Used for identity verification only.</span>
+                        <h:message for="ssnLastFour" styleClass="field-error" id="ssn-error" role="alert" />
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Section 2: Contact Information -->
+            <div class="card">
+                <h2 class="card-title">Contact Information</h2>
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <h:inputText id="phone"
+                                     value="#{intakeBean.client.phone}"
+                                     maxlength="20"
+                                     autocomplete="tel"
+                                     inputmode="tel"
+                                     aria-describedby="phone-hint phone-error" />
+                        <span id="phone-hint" class="text-muted" style="font-size:.8rem;">Example: 801-555-0100</span>
+                        <h:message for="phone" styleClass="field-error" id="phone-error" role="alert" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <h:inputText id="email"
+                                     value="#{intakeBean.client.email}"
+                                     maxlength="150"
+                                     autocomplete="email"
+                                     inputmode="email"
+                                     aria-describedby="email-error" />
+                        <h:message for="email" styleClass="field-error" id="email-error" role="alert" />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="address1">
+                            Street Address <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:inputText id="address1"
+                                     value="#{intakeBean.client.addressLine1}"
+                                     required="true"
+                                     requiredMessage="Street address is required."
+                                     maxlength="200"
+                                     autocomplete="address-line1"
+                                     aria-required="true"
+                                     aria-describedby="address1-error" />
+                        <h:message for="address1" styleClass="field-error" id="address1-error" role="alert" />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="address2">Apartment / Unit (optional)</label>
+                        <h:inputText id="address2"
+                                     value="#{intakeBean.client.addressLine2}"
+                                     maxlength="100"
+                                     autocomplete="address-line2" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">
+                            City <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:inputText id="city"
+                                     value="#{intakeBean.client.city}"
+                                     required="true"
+                                     requiredMessage="City is required."
+                                     maxlength="80"
+                                     autocomplete="address-level2"
+                                     aria-required="true"
+                                     aria-describedby="city-error" />
+                        <h:message for="city" styleClass="field-error" id="city-error" role="alert" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="state">
+                            State <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:selectOneMenu id="state"
+                                         value="#{intakeBean.client.stateCode}"
+                                         required="true"
+                                         requiredMessage="State is required."
+                                         autocomplete="address-level1"
+                                         aria-required="true"
+                                         aria-describedby="state-error">
+                            <f:selectItem itemValue="" itemLabel="— Select —" noSelectionOption="true" />
+                            <f:selectItem itemValue="UT" itemLabel="Utah" />
+                            <f:selectItem itemValue="ID" itemLabel="Idaho" />
+                            <f:selectItem itemValue="NV" itemLabel="Nevada" />
+                            <f:selectItem itemValue="AZ" itemLabel="Arizona" />
+                            <f:selectItem itemValue="WY" itemLabel="Wyoming" />
+                            <f:selectItem itemValue="CO" itemLabel="Colorado" />
+                            <f:selectItem itemValue="NM" itemLabel="New Mexico" />
+                        </h:selectOneMenu>
+                        <h:message for="state" styleClass="field-error" id="state-error" role="alert" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zip">
+                            ZIP Code <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:inputText id="zip"
+                                     value="#{intakeBean.client.zip}"
+                                     required="true"
+                                     requiredMessage="ZIP code is required."
+                                     maxlength="10"
+                                     autocomplete="postal-code"
+                                     inputmode="numeric"
+                                     aria-required="true"
+                                     aria-describedby="zip-error" />
+                        <h:message for="zip" styleClass="field-error" id="zip-error" role="alert" />
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Section 3: Service Request -->
+            <div class="card">
+                <h2 class="card-title">Service Requested</h2>
+                <div class="form-grid">
+
+                    <div class="form-group full-width">
+                        <label for="serviceType">
+                            Type of Service <span class="required" aria-hidden="true">*</span>
+                        </label>
+                        <h:selectOneMenu id="serviceType"
+                                         value="#{intakeBean.selectedServiceType}"
+                                         required="true"
+                                         requiredMessage="Please select the type of service you are applying for."
+                                         aria-required="true"
+                                         aria-describedby="serviceType-error">
+                            <f:selectItem itemValue="" itemLabel="— Select a service —" noSelectionOption="true" />
+                            <f:selectItems value="#{intakeBean.serviceTypes}"
+                                           var="svc"
+                                           itemValue="#{svc.name()}"
+                                           itemLabel="#{svc.displayName}" />
+                        </h:selectOneMenu>
+                        <h:message for="serviceType" styleClass="field-error" id="serviceType-error" role="alert" />
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="flex-row mt-2">
+                <h:commandButton value="Review My Application"
+                                 action="#{intakeBean.reviewApplication}"
+                                 styleClass="btn btn-primary"
+                                 rendered="#{!intakeBean.reviewMode}"
+                                 aria-label="Review your application before submitting" />
+                <h:button value="Cancel" outcome="/public/index"
+                          styleClass="btn btn-secondary"
+                          rendered="#{!intakeBean.reviewMode}" />
+            </div>
+
+            <p class="text-muted mt-2" style="font-size:.85rem;" rendered="#{!intakeBean.reviewMode}">
+                <span aria-hidden="true">*</span> Required fields.
+                Your information is protected under the Utah Government Records Access and Management Act (GRAMA).
+            </p>
+
+        </h:form>
+
+        <!-- Step 2: Review panel — shown after clicking "Review My Application" -->
+        <h:panelGroup rendered="#{intakeBean.reviewMode}" layout="block">
+            <div class="card" style="border-left: 5px solid var(--color-primary);">
+                <h2 class="card-title">Please Review Your Application</h2>
+                <p class="text-muted mb-2" style="font-size:.9rem;">
+                    Please confirm the information below is correct before submitting.
+                    Use the <strong>Go Back and Edit</strong> button to make changes.
+                </p>
+
+                <div class="form-grid" style="gap:.75rem 1.5rem; margin-bottom:1.25rem;">
+                    <div>
+                        <div class="text-muted" style="font-size:.8rem;">Full Name</div>
+                        <strong>#{intakeBean.client.firstName} #{intakeBean.client.lastName}</strong>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:.8rem;">Date of Birth</div>
+                        <strong>#{intakeBean.formattedDateOfBirth}</strong>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:.8rem;">Phone</div>
+                        <strong>#{intakeBean.client.phone}</strong>
+                    </div>
+                    <div>
+                        <div class="text-muted" style="font-size:.8rem;">Email</div>
+                        <strong>#{intakeBean.client.email}</strong>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <div class="text-muted" style="font-size:.8rem;">Address</div>
+                        <strong>
+                            #{intakeBean.client.addressLine1}
+                            #{intakeBean.client.addressLine2}
+                            #{intakeBean.client.city}, #{intakeBean.client.stateCode} #{intakeBean.client.zip}
+                        </strong>
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <div class="text-muted" style="font-size:.8rem;">Service Requested</div>
+                        <strong>#{intakeBean.selectedServiceTypeLabel}</strong>
+                    </div>
+                </div>
+
+                <h:form id="confirmForm" aria-label="Confirm and submit application">
+                    <div class="flex-row">
+                        <h:commandButton value="Confirm and Submit"
+                                         action="#{intakeBean.submitApplication}"
+                                         styleClass="btn btn-primary"
+                                         aria-label="Confirm your information and submit the application" />
+                        <h:commandButton value="&#8592; Go Back and Edit"
+                                         action="#{intakeBean.editApplication}"
+                                         styleClass="btn btn-secondary"
+                                         immediate="true"
+                                         aria-label="Go back and edit your application" />
+                    </div>
+                </h:form>
+            </div>
+        </h:panelGroup>
+
+    </ui:define>
+
+</ui:composition>
+</html>

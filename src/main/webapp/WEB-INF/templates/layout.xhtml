@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      lang="en">
+
+<h:head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+        WCAG 2.1 SC 2.4.2 — Page titled
+        Each page overrides this via the 'title' ui:param.
+    -->
+    <title><ui:insert name="pageTitle">HHS Case Management</ui:insert> | Utah Division of Health &amp; Human Services</title>
+    <h:outputStylesheet library="css" name="main.css" />
+    <ui:insert name="head" />
+</h:head>
+
+<!-- f:metadata slot — must be outside h:head and h:body to be a direct child of the view -->
+<ui:insert name="metadata" />
+
+<h:body>
+
+    <!-- WCAG 2.1 SC 2.4.1 — Bypass blocks via skip navigation -->
+    <a class="skip-nav" href="#main-content">Skip to main content</a>
+
+    <header class="site-header" role="banner">
+        <div class="header-inner">
+            <a class="site-logo" href="#{request.contextPath}/public/index.xhtml"
+               aria-label="Utah HHS Case Management — Home">
+                <span class="site-logo-text">
+                    Utah HHS
+                    <span class="site-logo-sub">Division of Health &amp; Human Services</span>
+                </span>
+            </a>
+
+            <nav aria-label="Primary navigation">
+                <ul class="header-nav" role="list">
+                    <li>
+                        <h:link outcome="/public/index" value="Public Portal" />
+                    </li>
+                    <h:panelGroup rendered="#{sessionBean.loggedIn}">
+                        <li>
+                            <h:link outcome="/staff/dashboard" value="Dashboard" />
+                        </li>
+                        <li>
+                            <h:form>
+                                <h:commandButton value="Sign Out (#{sessionBean.currentUserName})"
+                                                 action="#{loginBean.logout}"
+                                                 styleClass="header-nav"
+                                                 aria-label="Sign out — currently signed in as #{sessionBean.currentUserName}" />
+                            </h:form>
+                        </li>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{!sessionBean.loggedIn}">
+                        <li>
+                            <h:link outcome="/login" value="Staff Login" />
+                        </li>
+                    </h:panelGroup>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+        <div class="page-wrapper">
+            <ui:insert name="content">
+                <!-- Page content inserted here -->
+            </ui:insert>
+        </div>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+        <p>&#169; 2026 State of Utah &#8212; Division of Health &amp; Human Services.
+           For assistance call <a href="tel:18005550100" style="color:inherit;">1-800-555-0100</a>.</p>
+    </footer>
+
+</h:body>
+</html>

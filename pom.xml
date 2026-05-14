@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>gov.state.hhs</groupId>
+    <artifactId>hhs-case-management-j8</artifactId>
+    <version>1.0.0</version>
+    <packaging>war</packaging>
+
+    <name>HHS Client Intake and Case Management (Java 8)</name>
+    <description>
+        A Java EE 8 application for the Division of Health and Human Services
+        supporting citizen service intake and internal staff case management.
+        Targets Java 8 / WildFly 18.
+    </description>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javaee.version>8.0.1</javaee.version>
+        <wildfly.version>18.0.1.Final</wildfly.version>
+        <hibernate.version>5.4.33.Final</hibernate.version>
+        <junit.version>5.10.1</junit.version>
+        <mockito.version>4.11.0</mockito.version>
+    </properties>
+
+    <dependencies>
+        <!-- Java EE 8 Full Platform (provided by WildFly at runtime) -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>${javaee.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- H2 1.4.200 — compatible with both Hibernate 5 boolean handling and WildFly 18.
+             H2 2.x introduced strict BOOLEAN/INTEGER type checking that breaks Hibernate 5's
+             boolean-as-integer mapping. 1.4.200 is the last 1.x release and handles both
+             runtime (WAR) and test execution correctly. -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- ============================================================ -->
+        <!-- Test dependencies                                             -->
+        <!-- ============================================================ -->
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito 4.x — last version supporting Java 8 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- mockito-inline required for Mockito.mockStatic() in Mockito 4.x.
+             In Mockito 5.x this was merged into mockito-core, but on Java 8
+             we must use 4.x and add this artifact explicitly. -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Hibernate 5 ORM for JPA integration tests (standalone, no container) -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- hibernate-entitymanager is a separate artifact in Hibernate 5 —
+             it was merged into hibernate-core only in Hibernate 6.
+             Required for javax.persistence.Persistence bootstrap in standalone tests. -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Hibernate Validator 6.x — last version for Java EE 8 / Java 8 -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>6.2.5.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>hhs-case-management-j8</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- WildFly 18 Maven Plugin -->
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>2.1.0.Final</version>
+                <configuration>
+                    <version>${wildfly.version}</version>
+                    <!-- Run CLI script to register the H2 datasource before deployment -->
+                    <scripts>
+                        <script>${project.basedir}/src/main/scripts/datasource.cli</script>
+                    </scripts>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

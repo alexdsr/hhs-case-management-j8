@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    WildFly datasource descriptor.
+    Place this file at:
+        src/main/webapp/WEB-INF/jboss-web.xml  (JNDI context)
+    and keep this standalone-datasource.xml for reference.
+
+    The H2 in-memory datasource is configured here for demo purposes.
+    Replace with an Oracle or PostgreSQL datasource for production.
+-->
+<datasources xmlns="urn:jboss:domain:datasources:7.0">
+
+    <datasource jndi-name="java:jboss/datasources/HHSDataSource"
+                pool-name="HHSDataSource"
+                enabled="true"
+                use-java-context="true">
+
+        <!-- H2 file-based database — persists across restarts, supports multiple connections -->
+        <connection-url>jdbc:h2:file:~/hhsdb_j8/hhsdb_j8</connection-url>
+        <driver>h2</driver>
+
+        <security>
+            <user-name>sa</user-name>
+            <password>sa</password>
+        </security>
+
+        <validation>
+            <validate-on-match>false</validate-on-match>
+            <background-validation>false</background-validation>
+        </validation>
+
+        <pool>
+            <min-pool-size>2</min-pool-size>
+            <max-pool-size>20</max-pool-size>
+            <prefill>true</prefill>
+        </pool>
+
+    </datasource>
+
+    <drivers>
+        <driver name="h2" module="com.h2database.h2">
+            <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+        </driver>
+    </drivers>
+
+</datasources>

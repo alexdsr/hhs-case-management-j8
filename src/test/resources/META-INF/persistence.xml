@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd"
+             version="2.2">
+
+    <!--
+        Standalone persistence unit for integration tests.
+        Uses RESOURCE_LOCAL transactions (no JTA/container required).
+    -->
+    <persistence-unit name="hhsTestPU" transaction-type="RESOURCE_LOCAL">
+
+        <class>gov.state.hhs.model.User</class>
+        <class>gov.state.hhs.model.Client</class>
+        <class>gov.state.hhs.model.ServiceApplication</class>
+        <class>gov.state.hhs.model.CaseNote</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="javax.persistence.jdbc.driver"   value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url"      value="jdbc:h2:mem:hhstest;DB_CLOSE_DELAY=-1"/>
+            <property name="javax.persistence.jdbc.user"     value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <!-- Use H2Dialect which works correctly with Hibernate 5 + H2 1.4.x -->
+            <property name="hibernate.dialect"               value="org.hibernate.dialect.H2Dialect"/>
+            <property name="hibernate.hbm2ddl.auto"          value="create-drop"/>
+            <property name="hibernate.show_sql"              value="false"/>
+            <!-- Hibernate 5 maps boolean as integer — H2 1.4.x handles this correctly -->
+            <property name="hibernate.type.preferred_boolean_jdbc_type_code" value="16"/>
+        </properties>
+    </persistence-unit>
+
+</persistence>

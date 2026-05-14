@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      lang="en">
+
+<ui:composition template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="pageTitle">Staff Dashboard</ui:define>
+
+    <ui:define name="content">
+
+        <h1 class="page-title">Case Dashboard</h1>
+
+        <p class="text-muted mb-2">
+            Welcome, <strong>#{sessionBean.currentUserName}</strong>
+            (#{sessionBean.currentUserRole})
+        </p>
+
+        <h:messages globalOnly="true" styleClass="alert alert-info"
+                    role="status" aria-live="polite" />
+
+        <!-- Status summary tiles — scoped to caseworker's own cases or system-wide for admin -->
+        <section aria-labelledby="summary-heading">
+            <h2 id="summary-heading" class="sr-only">
+                <h:outputText value="My case status summary"   rendered="#{!sessionBean.admin}" />
+                <h:outputText value="System-wide case summary" rendered="#{sessionBean.admin}" />
+            </h2>
+            <div class="stat-grid">
+                <div class="stat-tile">
+                    <span class="stat-value">#{dashboardBean.totalCases}</span>
+                    <span class="stat-label">
+                        <h:outputText value="My Cases"    rendered="#{!sessionBean.admin}" />
+                        <h:outputText value="Total Cases" rendered="#{sessionBean.admin}" />
+                    </span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-value">#{dashboardBean.getCountForStatus('PENDING')}</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-value">#{dashboardBean.getCountForStatus('IN_REVIEW')}</span>
+                    <span class="stat-label">In Review</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-value">#{dashboardBean.getCountForStatus('APPROVED')}</span>
+                    <span class="stat-label">Approved</span>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-value">#{dashboardBean.getCountForStatus('DENIED')}</span>
+                    <span class="stat-label">Denied</span>
+                </div>
+                <!-- Unassigned tile — admin only -->
+                <h:panelGroup rendered="#{sessionBean.admin}" layout="block"
+                              styleClass="stat-tile"
+                              style="border-top-color: var(--color-accent);">
+                    <span class="stat-value" style="color: var(--color-accent);">
+                        #{dashboardBean.unassignedCount}
+                    </span>
+                    <span class="stat-label">Unassigned</span>
+                </h:panelGroup>
+            </div>
+        </section>
+
+        <!-- Filter (admin only) -->
+        <h:panelGroup rendered="#{sessionBean.admin}">
+            <div class="card" style="padding:1rem 1.5rem;">
+                <h:form id="filterForm" aria-label="Filter cases by status">
+                    <div class="flex-row">
+                        <label for="filterStatus" style="margin:0; white-space:nowrap;">
+                            Filter by status:
+                        </label>
+                        <h:selectOneMenu id="filterStatus"
+                                         value="#{dashboardBean.filterStatus}"
+                                         style="width:200px;">
+                            <f:selectItem itemValue=""           itemLabel="All Statuses" />
+                            <f:selectItem itemValue="UNASSIGNED" itemLabel="— Unassigned —" />
+                            <f:selectItems value="#{dashboardBean.allStatuses}"
+                                           var="s"
+                                           itemValue="#{s.name()}"
+                                           itemLabel="#{s.displayName}" />
+                        </h:selectOneMenu>
+                        <h:commandButton value="Apply"
+                                         action="#{dashboardBean.applyFilter}"
+                                         styleClass="btn btn-secondary btn-sm" />
+                    </div>
+                </h:form>
+            </div>
+        </h:panelGroup>
+
+        <!-- Case queue table -->
+        <div class="card" style="padding:0; overflow-x:auto;">
+            <table class="data-table" aria-label="Case queue">
+                <caption class="sr-only">
+                    <h:outputText value="My assigned cases"  rendered="#{!sessionBean.admin}" />
+                    <h:outputText value="All system cases"   rendered="#{sessionBean.admin}" />
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Case #</th>
+                        <th scope="col">Client Name</th>
+                        <th scope="col">Service Type</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Submitted</th>
+                        <th scope="col">Assigned To</th>
+                        <th scope="col"><span class="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ui:repeat value="#{dashboardBean.myCases}" var="app">
+                        <tr>
+                            <td>
+                                <span style="font-family:monospace;">#{dashboardBean.formatCaseNumber(app.id)}</span>
+                            </td>
+                            <td>#{app.client.fullName}</td>
+                            <td>#{app.serviceType.displayName}</td>
+                            <td>
+                                <span class="badge badge-#{app.status.name().toLowerCase().replace('_', '-')}">
+                                    <span class="sr-only">Status:</span>
+                                    #{app.status.displayName}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-#{app.priority.name().toLowerCase()}">
+                                    <span class="sr-only">Priority:</span>
+                                    #{app.priority.displayName}
+                                </span>
+                            </td>
+                            <td>
+                                <h:outputText value="#{app.submittedDate}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy" type="localDateTime" />
+                                </h:outputText>
+                            </td>
+                            <td>
+                                <h:outputText value="#{app.assignedTo != null ? app.assignedTo.fullName : '— Unassigned'}" />
+                            </td>
+                            <td>
+                                <h:link outcome="/staff/case-detail"
+                                        styleClass="btn btn-secondary btn-sm"
+                                        aria-label="View case #{dashboardBean.formatCaseNumber(app.id)} for #{app.client.fullName}">
+                                    <f:param name="id" value="#{app.id}" />
+                                    View
+                                </h:link>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+
+                    <ui:fragment rendered="#{empty dashboardBean.myCases}">
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:2rem; color:var(--color-text-muted);">
+                                No cases found.
+                            </td>
+                        </tr>
+                    </ui:fragment>
+                </tbody>
+            </table>
+        </div>
+
+    </ui:define>
+
+</ui:composition>
+</html>

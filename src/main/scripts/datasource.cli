@@ -1,0 +1,19 @@
+# HHS Case Management — WildFly datasource provisioning script
+# Executed by the WildFly Maven plugin before deployment.
+# Registers the H2 in-memory datasource under the JNDI name
+# expected by persistence.xml: java:jboss/datasources/HHSDataSource
+
+# Only add the datasource if it doesn't already exist
+if (outcome != success) of /subsystem=datasources/data-source=HHSDataSource:read-resource
+    /subsystem=datasources/data-source=HHSDataSource:add( \
+        jndi-name="java:jboss/datasources/HHSDataSource", \
+        driver-name="h2", \
+        connection-url="jdbc:h2:file:~/hhsdb_j8/hhsdb_j8;USER=sa;PASSWORD=sa", \
+        user-name="sa", \
+        password="sa", \
+        min-pool-size=2, \
+        max-pool-size=20, \
+        enabled=true, \
+        use-java-context=true \
+    )
+end-if
